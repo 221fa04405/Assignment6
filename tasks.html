@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <h1>
+            <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="40px" fill="white">
+                <path d="M480-80q-84.33 0-157.33-30.83-73-30.84-127-84.84t-84.84-127Q80-395.67 80-480q0-83.67 30.83-156.67 30.84-73 84.84-127t127-85.16Q395.67-880 480-880q71.67 0 134.33 22.33Q677-835.33 728-796l-48 48.33q-42-31.33-92.33-48.5-50.34-17.16-107.67-17.16-141 0-237.17 96.16Q146.67-621 146.67-480t96.16 237.17Q339-146.67 480-146.67q35.33 0 68.33-6.66Q581.33-160 612-173l50 51q-41 20-86.67 31Q529.67-80 480-80Zm286.67-86.67v-120h-120v-66.66h120v-120h66.66v120h120v66.66h-120v120h-66.66ZM422-297.33 255.33-464.67 304-513.33l118 118L831.33-805l49.34 48.67-458.67 459Z"/>
+            </svg>
+            Task Manager
+        </h1>
+        <nav>
+            <a href="index.html">🏠 Home</a>
+            <a href="task-manager.html">📝 Tasks</a>
+            <a href="login.html">🔑 Login</a>
+            <a class="space" href="register.html">🆕 Register</a>
+        </nav>
+    </header>
+
+    <main class="centered">
+        <div class="box">
+            <h2>Your Tasks</h2>
+            <form id="taskForm">
+                <label for="taskInput">New Task:</label>
+                <input type="text" id="taskInput" placeholder="🌼 What do you want to accomplish?" required>
+                <label for="dueDate">Due Date:</label>
+                <input type="date" id="dueDate" required>
+                <label for="priority">Priority:</label>
+                <select id="priority" required>
+                    <option value="">Select Priority</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+                <button type="submit">Add Task</button>
+            </form>
+            <input type="text" id="searchInput" placeholder="🔍 Search tasks..." style="margin-top: 15px;">
+            <ul id="taskList"></ul>
+            <div id="completedTasksMessage" style="display: none; margin-top: 15px;">All tasks are completed! 🎉</div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Task Management App - Stay organized! 🌈</p>
+    </footer>
+
+    <script>
+        document.getElementById('taskForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const taskInput = document.getElementById('taskInput').value;
+            const dueDateInput = document.getElementById('dueDate').value;
+            const priorityInput = document.getElementById('priority').value;
+            const taskList = document.getElementById('taskList');
+
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <input type="checkbox" class="task-checkbox" style="margin-right: 10px;">
+                ${taskInput} (Due: ${dueDateInput}, Priority: ${priorityInput})
+            `;
+            li.dataset.priority = priorityInput;
+
+            const editButton = document.createElement('button');
+            editButton.textContent = '✏️';
+            editButton.style.marginLeft = '10px';
+            editButton.onclick = function() {
+                const newTask = prompt('Edit Task:', taskInput);
+                if (newTask) {
+                    li.innerHTML = `
+                        <input type="checkbox" class="task-checkbox" style="margin-right: 10px;">
+                        ${newTask} (Due: ${dueDateInput}, Priority: ${priorityInput})
+                    `;
+                    li.appendChild(editButton);
+                    li.appendChild(deleteButton);
+                }
+            };
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = '❌';
+            deleteButton.style.marginLeft = '10px';
+            deleteButton.onclick = function() {
+                taskList.removeChild(li);
+                checkIfAllCompleted();
+            };
+
+            li.appendChild(editButton);
+            li.appendChild(deleteButton);
+            taskList.appendChild(li);
+            document.getElementById('taskInput').value = ''; 
+            document.getElementById('dueDate').value = '';
+            document.getElementById('priority').value = '';
+
+            // Add event listener for checkbox
+            const checkbox = li.querySelector('.task-checkbox');
+            checkbox.addEventListener('change', checkIfAllCompleted);
+
+            checkIfAllCompleted();
+        });
+
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase();
+            const tasks = document.querySelectorAll('#taskList li');
+            tasks.forEach(function(task) {
+                const taskText = task.textContent.toLowerCase();
+                task.style.display = taskText.includes(searchValue) ? '' : 'none';
+            });
+        });
+
+        function checkIfAllCompleted() {
+            const tasks = document.querySelectorAll('#taskList li');
+            const allCompleted = Array.from(tasks).every(task => task.querySelector('.task-checkbox').checked);
+            const message = document.getElementById('completedTasksMessage');
+            message.style.display = allCompleted ? 'block' : 'none';
+        }
+    </script>
+</body>
+
+</html>
