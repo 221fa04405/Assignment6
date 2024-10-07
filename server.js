@@ -1,15 +1,38 @@
-
 const http = require("http");
 const path = require("path");
 const fs = require("fs");
 
-const port = 4882;
+const port = 3562;
 const regpage = path.join(__dirname, "register1.html");
 const loginpage = path.join(__dirname, "login1.html");
-const loginFile = path.join(__dirname, "login1.json"); // File for storing user data
+const loginFile = path.join(__dirname, "login.json"); // File for storing user data
+const indexpage = path.join(__dirname, "index.html"); // Path to the index.html
+const styleFile = path.join(__dirname, "styles.css"); // Path to the styles.css
 
 const app = http.createServer((req, res) => {
-   if (req.url === "/reg" && req.method === "GET") {
+   if (req.url === "/" && req.method === "GET") {
+      // Serve the index page
+      fs.readFile(indexpage, "utf-8", (err, data) => {
+         if (err) {
+            res.writeHead(500, { "Content-Type": "text/plain" });
+            res.end("Error loading index page");
+         } else {
+            res.writeHead(200, { "Content-Type": "text/html" });
+            res.end(data);
+         }
+      });
+   } else if (req.url === "/styles.css" && req.method === "GET") {
+      // Serve the CSS file
+      fs.readFile(styleFile, "utf-8", (err, data) => {
+         if (err) {
+            res.writeHead(500, { "Content-Type": "text/plain" });
+            res.end("Error loading CSS file");
+         } else {
+            res.writeHead(200, { "Content-Type": "text/css" });
+            res.end(data);
+         }
+      });
+   } else if (req.url === "/reg" && req.method === "GET") {
       // Serve the registration page
       fs.readFile(regpage, "utf-8", (err, data) => {
          if (err) {
@@ -59,6 +82,13 @@ const app = http.createServer((req, res) => {
                users = JSON.parse(data); // If data exists, parse the JSON
             }
 
+            // Check if the user is already registered
+            const userExists = users.find(user => user.email === email);
+            if (userExists) {
+               res.writeHead(400, { "Content-Type": "text/plain" });
+               return res.end("User with this email already exists.");
+            }
+
             // Add the new user's data to the list of users
             users.push(userData);
 
@@ -69,7 +99,7 @@ const app = http.createServer((req, res) => {
                   res.end("Error saving registration data");
                } else {
                   // Redirect to login page after successful registration
-                  res.writeHead(302, { "Location": "/login" }); // Redirect to the login page
+                  res.writeHead(302, { "Location": "/login" });
                   res.end();
                }
             });
